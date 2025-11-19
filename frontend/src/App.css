@@ -1,0 +1,120 @@
+:root[data-theme='light'] {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --header-bg: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --border-color: #e0e0e0;
+  --divider-color: #e0e0e0;
+  --hover-bg: #f0f0f0;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --primary-color: #3b82f6;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme='dark'] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --header-bg: #2d2d2d;
+  --card-bg: #2d2d2d;
+  --text-primary: #e5e5e5;
+  --text-secondary: #b3b3b3;
+  --text-tertiary: #808080;
+  --border-color: #404040;
+  --divider-color: #404040;
+  --hover-bg: #3a3a3a;
+  --input-bg: #3a3a3a;
+  --input-border: #4a4a4a;
+  --primary-color: #3b82f6;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4);
+}
+
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
+  overflow: hidden;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding-top: calc(2rem + 80px);
+  padding-bottom: calc(2rem + 60px);
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1.5rem 1rem;
+    padding-top: calc(1.5rem + 120px);
+    padding-bottom: calc(1.5rem + 50px);
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem 0.75rem;
+    padding-top: calc(1rem + 110px);
+    padding-bottom: calc(1rem + 45px);
+  }
+}
+
+.charts-section {
+  margin-top: 48px;
+}
+
+.charts-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 3px solid var(--primary-color);
+  text-align: center;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-section-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .charts-grid {
+    gap: 16px;
+  }
+
+  .charts-section {
+    margin-top: 32px;
+  }
+
+  .charts-section-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+}
