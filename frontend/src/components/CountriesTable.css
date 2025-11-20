@@ -1,0 +1,94 @@
+.countries-table-container {
+  background-color: var(--card-bg);
+  border-radius: 25px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  transition: background-color 0.3s ease;
+}
+
+.table-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.countries-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.countries-table thead {
+  background-color: var(--bg-secondary);
+  transition: background-color 0.3s ease;
+}
+
+.countries-table th {
+  text-align: left;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.countries-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--divider-color);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.countries-table tbody tr:hover {
+  background-color: var(--hover-bg);
+}
+
+.countries-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.votes-cell {
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.no-results {
+  text-align: center;
+  color: var(--text-tertiary);
+  padding: 2rem !important;
+  transition: color 0.3s ease;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-tertiary);
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .countries-table-container {
+    padding: 1rem;
+  }
+
+  .countries-table {
+    font-size: 0.85rem;
+  }
+
+  .countries-table th,
+  .countries-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .table-title {
+    font-size: 1.5rem;
+  }
+}
