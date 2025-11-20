@@ -20,6 +20,7 @@ describe('VotesService', () => {
     countDocuments: jest.Mock;
     find: jest.Mock;
     aggregate: jest.Mock;
+    distinct: jest.Mock;
   };
   let mockCacheManager: {
     get: jest.Mock;
@@ -63,6 +64,7 @@ describe('VotesService', () => {
       countDocuments: jest.fn(),
       find: jest.fn(),
       aggregate: jest.fn(),
+      distinct: jest.fn(),
     };
 
     mockCacheManager = {
@@ -110,6 +112,94 @@ describe('VotesService', () => {
         ConflictException,
       );
       await expect(service.createVote(mockVote)).rejects.toThrow(
+        MESSAGES.VOTE.ALREADY_VOTED,
+      );
+    });
+
+    it('should create a vote successfully when email has not voted', async () => {
+      const mockSavedVote = { ...mockVote, _id: '123' };
+      const saveMock = jest.fn().mockResolvedValue(mockSavedVote);
+
+      mockVoteModel.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      // Create a mock constructor function
+      const VoteModelMock = jest.fn().mockImplementation(() => ({
+        save: saveMock,
+      }));
+
+      // Copy other methods from mockVoteModel
+      Object.assign(VoteModelMock, mockVoteModel);
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          VotesService,
+          {
+            provide: getModelToken(Vote.name),
+            useValue: VoteModelMock,
+          },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
+          },
+          {
+            provide: CountriesService,
+            useValue: mockCountriesService,
+          },
+        ],
+      }).compile();
+
+      const serviceInstance = module.get<VotesService>(VotesService);
+
+      const result = await serviceInstance.createVote(mockVote);
+
+      expect(saveMock).toHaveBeenCalled();
+      expect(mockCacheManager.del).toHaveBeenCalled();
+      expect(result).toEqual(mockSavedVote);
+    });
+
+    it('should handle MongoDB duplicate key error (code 11000)', async () => {
+      const saveMock = jest
+        .fn()
+        .mockRejectedValue({ code: 11000, message: 'Duplicate key error' });
+
+      mockVoteModel.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(null),
+      });
+
+      // Create a mock constructor function
+      const VoteModelMock = jest.fn().mockImplementation(() => ({
+        save: saveMock,
+      }));
+
+      // Copy other methods from mockVoteModel
+      Object.assign(VoteModelMock, mockVoteModel);
+
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          VotesService,
+          {
+            provide: getModelToken(Vote.name),
+            useValue: VoteModelMock,
+          },
+          {
+            provide: CACHE_MANAGER,
+            useValue: mockCacheManager,
+          },
+          {
+            provide: CountriesService,
+            useValue: mockCountriesService,
+          },
+        ],
+      }).compile();
+
+      const serviceInstance = module.get<VotesService>(VotesService);
+
+      await expect(serviceInstance.createVote(mockVote)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(serviceInstance.createVote(mockVote)).rejects.toThrow(
         MESSAGES.VOTE.ALREADY_VOTED,
       );
     });
@@ -181,6 +271,26 @@ describe('VotesService', () => {
 
       expect(result).toHaveLength(10);
     });
+
+    it('should stop fetching countries when limit is reached', async () => {
+      const mockAggregatedVotes = [
+        { _id: 'USA', countryName: 'United States', voteCount: 10 },
+        { _id: 'CAN', countryName: 'Canada', voteCount: 8 },
+        { _id: 'MEX', countryName: 'Mexico', voteCount: 6 },
+        { _id: 'BRA', countryName: 'Brazil', voteCount: 4 },
+      ];
+
+      mockCacheManager.get.mockResolvedValue(null);
+      mockVoteModel.aggregate.mockResolvedValue(mockAggregatedVotes);
+      mockCountriesService.getCountryByCode.mockResolvedValue(
+        mockCountryDetails,
+      );
+
+      const result = await service.getTopCountries(2);
+
+      expect(result).toHaveLength(2);
+      expect(mockCountriesService.getCountryByCode).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('hasVoted', () => {
@@ -236,6 +346,183 @@ describe('VotesService', () => {
       expect(mockVoteModel.find).toHaveBeenCalled();
       expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
       expect(result).toEqual(mockVotes);
+    });
+  });
+
+  describe('getVotesByRegion', () => {
+    it('should return votes grouped by region', async () => {
+      const mockVotes = [
+        { ...mockVote, countryCode: 'USA' },
+        { ...mockVote, countryCode: 'CAN', email: 'jane@example.com' },
+      ];
+
+      const mockCountryDetailsCA = {
+        ...mockCountryDetails,
+        code: 'CAN',
+        name: 'Canada',
+        region: 'Americas',
+        subregion: 'North America',
+      };
+
+      mockVoteModel.find.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockVotes),
+      });
+
+      mockCountriesService.getCountryByCode
+        .mockResolvedValueOnce(mockCountryDetails)
+        .mockResolvedValueOnce(mockCountryDetailsCA);
+
+      const result = await service.getVotesByRegion();
+
+      expect(mockVoteModel.find).toHaveBeenCalled();
+      expect(mockCountriesService.getCountryByCode).toHaveBeenCalledTimes(2);
+      expect(result).toEqual([{ region: 'North America', votes: 2 }]);
+    });
+
+    it('should handle votes with countries that have no subregion', async () => {
+      const mockVotes = [{ ...mockVote, countryCode: 'USA' }];
+
+      const mockCountryNoSubregion = {
+        ...mockCountryDetails,
+        subregion: undefined,
+      };
+
+      mockVoteModel.find.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockVotes),
+      });
+
+      mockCountriesService.getCountryByCode.mockResolvedValue(
+        mockCountryNoSubregion,
+      );
+
+      const result = await service.getVotesByRegion();
+
+      expect(result).toEqual([{ region: 'Americas', votes: 1 }]);
+    });
+
+    it('should skip votes for countries that cannot be found', async () => {
+      const mockVotes = [
+        { ...mockVote, countryCode: 'USA' },
+        { ...mockVote, countryCode: 'INVALID', email: 'jane@example.com' },
+      ];
+
+      mockVoteModel.find.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockVotes),
+      });
+
+      mockCountriesService.getCountryByCode
+        .mockResolvedValueOnce(mockCountryDetails)
+        .mockResolvedValueOnce(null);
+
+      const result = await service.getVotesByRegion();
+
+      expect(result).toEqual([{ region: 'North America', votes: 1 }]);
+    });
+  });
+
+  describe('getVotesTimeline', () => {
+    it('should return votes timeline grouped by date', async () => {
+      const mockVotes = [
+        { createdAt: new Date('2025-11-15T10:00:00Z') },
+        { createdAt: new Date('2025-11-15T15:00:00Z') },
+        { createdAt: new Date('2025-11-16T12:00:00Z') },
+      ];
+
+      const sortMock = jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockVotes),
+        }),
+      });
+
+      mockVoteModel.find.mockReturnValue({
+        sort: sortMock,
+      });
+
+      const result = await service.getVotesTimeline();
+
+      expect(mockVoteModel.find).toHaveBeenCalled();
+      expect(sortMock).toHaveBeenCalledWith({ createdAt: 1 });
+      expect(result).toEqual([
+        { date: '2025-11-15', votes: 2 },
+        { date: '2025-11-16', votes: 1 },
+      ]);
+    });
+
+    it('should handle votes without createdAt', async () => {
+      const mockVotes = [
+        { createdAt: new Date('2025-11-15T10:00:00Z') },
+        { createdAt: null },
+        { createdAt: undefined },
+      ];
+
+      const sortMock = jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockVotes),
+        }),
+      });
+
+      mockVoteModel.find.mockReturnValue({
+        sort: sortMock,
+      });
+
+      const result = await service.getVotesTimeline();
+
+      expect(result).toEqual([{ date: '2025-11-15', votes: 1 }]);
+    });
+  });
+
+  describe('getDetailedStats', () => {
+    it('should return comprehensive statistics', async () => {
+      const mockVotes = [
+        { ...mockVote, createdAt: new Date('2025-11-15T10:00:00Z') },
+        {
+          ...mockVote,
+          email: 'jane@example.com',
+          countryCode: 'CAN',
+          createdAt: new Date('2025-11-15T15:00:00Z'),
+        },
+      ];
+
+      mockVoteModel.countDocuments.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(2),
+      });
+
+      mockVoteModel.distinct.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(['USA', 'CAN']),
+      });
+
+      mockVoteModel.find.mockReturnValueOnce({
+        exec: jest.fn().mockResolvedValue(mockVotes),
+      });
+
+      const sortMock = jest.fn().mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          exec: jest.fn().mockResolvedValue(mockVotes),
+        }),
+      });
+
+      mockVoteModel.find.mockReturnValueOnce({
+        sort: sortMock,
+      });
+
+      mockCountriesService.getCountryByCode
+        .mockResolvedValueOnce(mockCountryDetails)
+        .mockResolvedValueOnce({
+          ...mockCountryDetails,
+          code: 'CAN',
+          subregion: 'North America',
+        });
+
+      const result = await service.getDetailedStats();
+
+      expect(result).toHaveProperty('totalVotes', 2);
+      expect(result).toHaveProperty('uniqueCountries', 2);
+      expect(result).toHaveProperty('votesByRegion');
+      expect(result).toHaveProperty('timeline');
+      expect(result.votesByRegion).toEqual([
+        { region: 'North America', votes: 2 },
+      ]);
+      expect(result.timeline).toEqual([{ date: '2025-11-15', votes: 2 }]);
     });
   });
 });

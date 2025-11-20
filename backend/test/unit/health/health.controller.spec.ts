@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthController } from '../../../src/health/health.controller';
-import { HealthCheckService, MongooseHealthIndicator } from '@nestjs/terminus';
+import {
+  HealthCheckService,
+  MongooseHealthIndicator,
+  HttpHealthIndicator,
+} from '@nestjs/terminus';
 
 describe('HealthController', () => {
   let controller: HealthController;
@@ -14,10 +18,16 @@ describe('HealthController', () => {
           database: {
             status: 'up',
           },
+          'rest-countries-api': {
+            status: 'up',
+          },
         },
         error: {},
         details: {
           database: {
+            status: 'up',
+          },
+          'rest-countries-api': {
             status: 'up',
           },
         },
@@ -27,6 +37,14 @@ describe('HealthController', () => {
     const mockMongooseHealthIndicator = {
       pingCheck: jest.fn().mockResolvedValue({
         database: {
+          status: 'up',
+        },
+      }),
+    };
+
+    const mockHttpHealthIndicator = {
+      pingCheck: jest.fn().mockResolvedValue({
+        'rest-countries-api': {
           status: 'up',
         },
       }),
@@ -42,6 +60,10 @@ describe('HealthController', () => {
         {
           provide: MongooseHealthIndicator,
           useValue: mockMongooseHealthIndicator,
+        },
+        {
+          provide: HttpHealthIndicator,
+          useValue: mockHttpHealthIndicator,
         },
       ],
     }).compile();
@@ -67,10 +89,16 @@ describe('HealthController', () => {
           database: {
             status: 'up',
           },
+          'rest-countries-api': {
+            status: 'up',
+          },
         },
         error: {},
         details: {
           database: {
+            status: 'up',
+          },
+          'rest-countries-api': {
             status: 'up',
           },
         },
