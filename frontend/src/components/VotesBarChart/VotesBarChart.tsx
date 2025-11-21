@@ -9,17 +9,29 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { votesApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import { votesApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import {
+  QUERY_KEY_TOP_COUNTRIES_CHART,
+  CHART_REFETCH_INTERVAL_MS,
+  TOP_COUNTRIES_PAGE_SIZE,
+  MAX_COUNTRY_NAME_DISPLAY_LENGTH,
+  BAR_CHART_HEIGHT,
+  BAR_CHART_MARGIN,
+  BAR_CHART_X_AXIS_ANGLE,
+  BAR_CHART_X_AXIS_HEIGHT,
+  BAR_CHART_COLOR,
+  BAR_BORDER_RADIUS,
+} from '../../utils/constants';
 import './VotesBarChart.css';
 
 export const VotesBarChart = () => {
   const { t } = useLanguage();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['topCountriesChart'],
-    queryFn: () => votesApi.getTopCountries(10),
-    refetchInterval: 30000,
+    queryKey: [QUERY_KEY_TOP_COUNTRIES_CHART],
+    queryFn: () => votesApi.getTopCountries(TOP_COUNTRIES_PAGE_SIZE),
+    refetchInterval: CHART_REFETCH_INTERVAL_MS,
   });
 
   if (isLoading) {
@@ -41,7 +53,7 @@ export const VotesBarChart = () => {
   }
 
   const chartData = data.map((country) => ({
-    name: country.name.length > 15 ? country.name.substring(0, 15) + '...' : country.name,
+    name: country.name.length > MAX_COUNTRY_NAME_DISPLAY_LENGTH ? country.name.substring(0, MAX_COUNTRY_NAME_DISPLAY_LENGTH) + '...' : country.name,
     fullName: country.name,
     votes: country.voteCount || 0,
   }));
@@ -49,14 +61,14 @@ export const VotesBarChart = () => {
   return (
     <div className="chart-container">
       <h3 className="chart-title">{t.charts.topCountriesTitle}</h3>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+      <ResponsiveContainer width="100%" height={BAR_CHART_HEIGHT}>
+        <BarChart data={chartData} margin={BAR_CHART_MARGIN}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
           <XAxis
             dataKey="name"
-            angle={-45}
+            angle={BAR_CHART_X_AXIS_ANGLE}
             textAnchor="end"
-            height={100}
+            height={BAR_CHART_X_AXIS_HEIGHT}
             tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
           />
           <YAxis tick={{ fill: 'var(--text-secondary)' }} />
@@ -74,7 +86,7 @@ export const VotesBarChart = () => {
             }}
           />
           <Legend />
-          <Bar dataKey="votes" fill="#3b82f6" name={t.countriesTable.votes} radius={[8, 8, 0, 0]} />
+          <Bar dataKey="votes" fill={BAR_CHART_COLOR} name={t.countriesTable.votes} radius={BAR_BORDER_RADIUS} />
         </BarChart>
       </ResponsiveContainer>
     </div>

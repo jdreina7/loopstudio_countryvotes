@@ -8,15 +8,20 @@ import {
   CountryDetails,
 } from '../common/interfaces/country.interface';
 import { MESSAGES } from '../common/constants/messages';
+import {
+  REST_COUNTRIES_ENDPOINT_ALL,
+  CACHE_KEY_ALL_COUNTRIES,
+  CACHE_COUNTRIES_TTL_MS,
+  CACHE_KEY_COUNTRY_PREFIX,
+  REST_COUNTRIES_ENDPOINT_ALPHA_PREFIX,
+  DEFAULT_CAPITAL,
+  DEFAULT_SUBREGION,
+} from '../utils/constants';
 
 @Injectable()
 export class CountriesService {
   private readonly logger = new Logger(CountriesService.name);
   private readonly REST_COUNTRIES_API: string;
-  private readonly API_FIELDS =
-    'all?fields=name,ccn3,cca2,cca3,capital,region,subregion,flags';
-  private readonly CACHE_KEY_ALL_COUNTRIES = 'all_countries';
-  private readonly CACHE_TTL = 3600000; // 1 hour for countries data
 
   constructor(
     private readonly httpService: HttpService,
@@ -33,7 +38,7 @@ export class CountriesService {
     try {
       // Check cache first
       const cached = await this.cacheManager.get<CountryDetails[]>(
-        this.CACHE_KEY_ALL_COUNTRIES,
+        CACHE_KEY_ALL_COUNTRIES,
       );
       if (cached) {
         this.logger.log(MESSAGES.COUNTRY.CACHED);
@@ -44,7 +49,7 @@ export class CountriesService {
       this.logger.log(MESSAGES.COUNTRY.FETCHING_API);
       const response = await firstValueFrom(
         this.httpService.get<Country[]>(
-          `${this.REST_COUNTRIES_API}/${this.API_FIELDS}`,
+          `${this.REST_COUNTRIES_API}/${REST_COUNTRIES_ENDPOINT_ALL}`,
         ),
       );
 
@@ -54,9 +59,9 @@ export class CountriesService {
 
       // Cache the result
       await this.cacheManager.set(
-        this.CACHE_KEY_ALL_COUNTRIES,
+        CACHE_KEY_ALL_COUNTRIES,
         countries,
-        this.CACHE_TTL,
+        CACHE_COUNTRIES_TTL_MS,
       );
 
       return countries;
@@ -77,7 +82,7 @@ export class CountriesService {
 
   async getCountryByCode(code: string): Promise<CountryDetails | null> {
     try {
-      const cacheKey = `country_${code}`;
+      const cacheKey = `${CACHE_KEY_COUNTRY_PREFIX}${code}`;
       const cached = await this.cacheManager.get<CountryDetails>(cacheKey);
       if (cached) {
         return cached;
@@ -85,7 +90,7 @@ export class CountriesService {
 
       const response = await firstValueFrom(
         this.httpService.get<Country[]>(
-          `${this.REST_COUNTRIES_API}/alpha/${code}`,
+          `${this.REST_COUNTRIES_API}${REST_COUNTRIES_ENDPOINT_ALPHA_PREFIX}${code}`,
         ),
       );
 
@@ -94,7 +99,11 @@ export class CountriesService {
       }
 
       const countryDetails = this.mapCountryToDetails(response.data[0]);
-      await this.cacheManager.set(cacheKey, countryDetails, this.CACHE_TTL);
+      await this.cacheManager.set(
+        cacheKey,
+        countryDetails,
+        CACHE_COUNTRIES_TTL_MS,
+      );
 
       return countryDetails;
     } catch (error) {
@@ -108,9 +117,9 @@ export class CountriesService {
       code: String(country.cca3),
       name: String(country.name.common),
       officialName: String(country.name.official),
-      capital: country.capital?.[0] ?? 'N/A',
+      capital: country.capital?.[0] ?? DEFAULT_CAPITAL,
       region: String(country.region),
-      subregion: country.subregion ?? 'N/A',
+      subregion: country.subregion ?? DEFAULT_SUBREGION,
       flag: String(country.flags.svg),
     };
   }

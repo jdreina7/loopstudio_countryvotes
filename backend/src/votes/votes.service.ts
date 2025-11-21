@@ -9,12 +9,22 @@ import { CountriesService } from '../countries/countries.service';
 import { CountryDetails } from '../common/interfaces/country.interface';
 import { IAggregatedVote } from '../common/interfaces/vote.interface';
 import { MESSAGES } from '../common/constants/messages';
+import {
+  CACHE_KEY_TOP_COUNTRIES,
+  CACHE_TOP_COUNTRIES_TTL_MS,
+  DEFAULT_TOP_COUNTRIES_LIMIT,
+  TOP_COUNTRIES_FETCH_MULTIPLIER,
+  MONGODB_DUPLICATE_KEY_ERROR_CODE,
+  VOTE_FIELD_COUNTRY_CODE,
+  VOTE_FIELD_COUNTRY_NAME,
+  VOTE_FIELD_CREATED_AT,
+  ISO_DATE_SEPARATOR,
+  ISO_DATE_PART_INDEX,
+} from '../utils/constants';
 
 @Injectable()
 export class VotesService {
   private readonly logger = new Logger(VotesService.name);
-  private readonly CACHE_KEY_TOP_COUNTRIES = 'top_countries';
-  private readonly CACHE_TTL = 300000; // 5 minutes
 
   constructor(
     @InjectModel(Vote.name) private voteModel: Model<Vote>,
@@ -42,7 +52,7 @@ export class VotesService {
       const savedVote = await vote.save();
 
       // Invalidate top countries cache
-      await this.cacheManager.del(this.CACHE_KEY_TOP_COUNTRIES);
+      await this.cacheManager.del(CACHE_KEY_TOP_COUNTRIES);
 
       this.logger.log(MESSAGES.VOTE.CREATED(createVoteDto.countryName));
       return savedVote;
@@ -55,7 +65,7 @@ export class VotesService {
         typeof error === 'object' &&
         error !== null &&
         'code' in error &&
-        (error as { code?: number }).code === 11000
+        (error as { code?: number }).code === MONGODB_DUPLICATE_KEY_ERROR_CODE
       ) {
         throw new ConflictException(MESSAGES.VOTE.ALREADY_VOTED);
       }
@@ -64,11 +74,13 @@ export class VotesService {
     }
   }
 
-  async getTopCountries(limit: number = 10): Promise<CountryDetails[]> {
+  async getTopCountries(
+    limit: number = DEFAULT_TOP_COUNTRIES_LIMIT,
+  ): Promise<CountryDetails[]> {
     try {
       // Check cache first
       const cached = await this.cacheManager.get<CountryDetails[]>(
-        this.CACHE_KEY_TOP_COUNTRIES,
+        CACHE_KEY_TOP_COUNTRIES,
       );
       if (cached) {
         this.logger.log(MESSAGES.COUNTRY.CACHED_TOP);
@@ -80,8 +92,8 @@ export class VotesService {
       const aggregation = await this.voteModel.aggregate<IAggregatedVote>([
         {
           $group: {
-            _id: '$countryCode',
-            countryName: { $first: '$countryName' },
+            _id: `$${VOTE_FIELD_COUNTRY_CODE}`,
+            countryName: { $first: `$${VOTE_FIELD_COUNTRY_NAME}` },
             voteCount: { $sum: 1 },
           },
         },
@@ -89,7 +101,7 @@ export class VotesService {
           $sort: { voteCount: -1 },
         },
         {
-          $limit: limit * 2, // Fetch extra to compensate for potential API failures
+          $limit: limit * TOP_COUNTRIES_FETCH_MULTIPLIER, // Fetch extra to compensate for potential API failures
         },
       ]);
 
@@ -113,9 +125,9 @@ export class VotesService {
 
       // Cache the result
       await this.cacheManager.set(
-        this.CACHE_KEY_TOP_COUNTRIES,
+        CACHE_KEY_TOP_COUNTRIES,
         topCountries,
-        this.CACHE_TTL,
+        CACHE_TOP_COUNTRIES_TTL_MS,
       );
 
       return topCountries;
@@ -137,7 +149,10 @@ export class VotesService {
   }
 
   async getAllVotes() {
-    return this.voteModel.find().sort({ createdAt: -1 }).exec();
+    return this.voteModel
+      .find()
+      .sort({ [VOTE_FIELD_CREATED_AT]: -1 })
+      .exec();
   }
 
   async getVotesByRegion() {
@@ -162,8 +177,8 @@ export class VotesService {
   async getVotesTimeline() {
     const votes = await this.voteModel
       .find()
-      .sort({ createdAt: 1 })
-      .select('createdAt')
+      .sort({ [VOTE_FIELD_CREATED_AT]: 1 })
+      .select(VOTE_FIELD_CREATED_AT)
       .exec();
 
     const timelineMap = new Map<string, number>();
@@ -171,7 +186,9 @@ export class VotesService {
     votes.forEach((vote) => {
       if (vote.createdAt) {
         const date = new Date(vote.createdAt);
-        const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const dateKey = date.toISOString().split(ISO_DATE_SEPARATOR)[
+          ISO_DATE_PART_INDEX
+        ]; // YYYY-MM-DD
         timelineMap.set(dateKey, (timelineMap.get(dateKey) || 0) + 1);
       }
     });
@@ -184,7 +201,9 @@ export class VotesService {
 
   async getDetailedStats() {
     const totalVotes = await this.getTotalVotes();
-    const uniqueCountries = await this.voteModel.distinct('countryCode').exec();
+    const uniqueCountries = await this.voteModel
+      .distinct(VOTE_FIELD_COUNTRY_CODE)
+      .exec();
     const votesByRegion = await this.getVotesByRegion();
     const timeline = await this.getVotesTimeline();
 

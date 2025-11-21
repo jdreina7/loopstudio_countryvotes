@@ -16,6 +16,13 @@ import {
 } from '@nestjs/swagger';
 import { VotesService } from './votes.service';
 import { CreateVoteDto } from './dto/create-vote.dto';
+import {
+  DEFAULT_TOP_COUNTRIES_LIMIT,
+  VOTE_SUCCESS_MESSAGE,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_CONFLICT,
+  HTTP_STATUS_BAD_REQUEST,
+} from '../utils/constants';
 
 @ApiTags('Votes')
 @Controller('votes')
@@ -31,21 +38,21 @@ export class VotesController {
   })
   @ApiBody({ type: CreateVoteDto })
   @ApiResponse({
-    status: 201,
+    status: HTTP_STATUS_CREATED,
     description: 'Vote created successfully',
   })
   @ApiResponse({
-    status: 409,
+    status: HTTP_STATUS_CONFLICT,
     description: 'Email has already voted',
   })
   @ApiResponse({
-    status: 400,
+    status: HTTP_STATUS_BAD_REQUEST,
     description: 'Invalid request data',
   })
   async createVote(@Body() createVoteDto: CreateVoteDto) {
     const vote = await this.votesService.createVote(createVoteDto);
     return {
-      message: 'Vote registered successfully',
+      message: VOTE_SUCCESS_MESSAGE,
       data: vote,
     };
   }
@@ -68,7 +75,7 @@ export class VotesController {
   })
   async getTopCountries(@Query('limit') limit?: number) {
     const topCountries = await this.votesService.getTopCountries(
-      limit ? parseInt(limit.toString(), 10) : 10,
+      limit ? parseInt(limit.toString(), 10) : DEFAULT_TOP_COUNTRIES_LIMIT,
     );
     return {
       data: topCountries,

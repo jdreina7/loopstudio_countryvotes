@@ -1,6 +1,11 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { CountriesService } from './countries.service';
+import {
+  SEARCH_QUERY_MIN_LENGTH,
+  SEARCH_QUERY_LENGTH_ERROR_MSG,
+  COUNTRY_NOT_FOUND_ERROR_MSG,
+} from '../utils/constants';
 
 @ApiTags('Countries')
 @Controller('countries')
@@ -26,9 +31,9 @@ export class CountriesController {
     example: 'un',
   })
   async searchCountries(@Query('q') query: string) {
-    if (!query || query.length < 2) {
+    if (!query || query.length < SEARCH_QUERY_MIN_LENGTH) {
       return {
-        error: 'Query must be at least 2 characters long',
+        error: SEARCH_QUERY_LENGTH_ERROR_MSG,
         results: [],
       };
     }
@@ -46,7 +51,7 @@ export class CountriesController {
   async getCountryByCode(@Param('code') code: string) {
     const country = await this.countriesService.getCountryByCode(code);
     if (!country) {
-      return { error: 'Country not found' };
+      return { error: COUNTRY_NOT_FOUND_ERROR_MSG };
     }
     return country;
   }

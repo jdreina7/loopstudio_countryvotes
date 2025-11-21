@@ -6,6 +6,11 @@ import {
   MongooseHealthIndicator,
   HttpHealthIndicator,
 } from '@nestjs/terminus';
+import {
+  REST_COUNTRIES_ENDPOINT_HEALTH_CHECK,
+  HEALTH_CHECK_DB_TIMEOUT_MS,
+  HEALTH_CHECK_API_TIMEOUT_MS,
+} from '../utils/constants';
 
 @ApiTags('Health')
 @Controller('health')
@@ -45,13 +50,14 @@ export class HealthController {
   check() {
     const restCountriesUrl =
       (process.env.REST_COUNTRIES_API || 'https://restcountries.com/v3.1') +
-      '/all?fields=name';
+      REST_COUNTRIES_ENDPOINT_HEALTH_CHECK;
 
     return this.health.check([
-      () => this.db.pingCheck('database', { timeout: 300 }),
+      () =>
+        this.db.pingCheck('database', { timeout: HEALTH_CHECK_DB_TIMEOUT_MS }),
       () =>
         this.http.pingCheck('rest-countries-api', restCountriesUrl, {
-          timeout: 3000,
+          timeout: HEALTH_CHECK_API_TIMEOUT_MS,
         }),
     ]);
   }

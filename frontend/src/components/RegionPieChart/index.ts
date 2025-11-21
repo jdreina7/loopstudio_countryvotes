@@ -1,0 +1,1 @@
+export { RegionPieChart } from './RegionPieChart';

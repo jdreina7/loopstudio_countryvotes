@@ -20,7 +20,7 @@
 }
 
 .autocomplete-input.error {
-  border-color: #dc3545;
+  border-color: #dc3545; /* ERROR_COLOR from constants.ts */
 }
 
 .suggestions-list {
@@ -51,8 +51,13 @@
   color: var(--text-primary);
 }
 
-.suggestion-item:hover {
+.suggestion-item:hover,
+.suggestion-item.selected {
   background-color: var(--hover-bg);
+}
+
+.suggestion-item.selected {
+  font-weight: 500;
 }
 
 .suggestion-item:not(:last-child) {

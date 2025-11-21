@@ -45,28 +45,21 @@
 }
 
 .form-group input.error {
-  border-color: #dc3545;
+  border-color: #dc3545; /* ERROR_COLOR from constants.ts */
 }
 
 .input-wrapper {
   position: relative;
 }
 
-.error-message {
-  color: #dc3545;
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
-  transition: color 0.3s ease;
-}
-
 .server-error-message {
   grid-column: 1 / -1;
-  color: #dc3545;
+  color: #dc3545; /* ERROR_COLOR from constants.ts */
   font-size: 0.9rem;
   padding: 0.75rem;
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgba(220, 53, 69, 0.1); /* ERROR_COLOR with transparency */
   border-radius: 6px;
-  border-left: 3px solid #dc3545;
+  border-left: 3px solid #dc3545; /* ERROR_COLOR from constants.ts */
   transition: background-color 0.3s ease;
 }
 

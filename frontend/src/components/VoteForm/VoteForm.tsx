@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { z } from 'zod';
-import { CountryAutocomplete } from './CountryAutocomplete';
-import { ErrorIcon } from './ErrorIcon';
-import { votesApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import { CountryAutocomplete } from '../CountryAutocomplete/CountryAutocomplete';
+import { ErrorIcon } from '../ErrorIcon/ErrorIcon';
+import { votesApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { ERROR_DUPLICATE_VOTE_KEY } from '../../utils/constants';
 import './VoteForm.css';
 
 interface VoteFormProps {
@@ -88,8 +89,8 @@ export const VoteForm = ({ onSuccess, onError }: VoteFormProps) => {
         });
         setErrors(fieldErrors);
       } else if (error instanceof Error) {
-        // Check if it's a duplicate email error (409)
-        if (error.message.includes('already voted')) {
+        // Check if it's a duplicate email error
+        if (error.message.includes(ERROR_DUPLICATE_VOTE_KEY)) {
           onError();
           setFormData({ name: '', email: '', countryName: '', countryCode: '', flag: '' });
           setErrors({});
