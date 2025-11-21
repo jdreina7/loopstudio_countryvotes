@@ -1,15 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { statisticsApi } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import { QUERY_KEY_STATISTICS, STATS_REFETCH_INTERVAL_MS } from '../utils/constants';
 import './StatsCards.css';
 
 export const StatsCards = () => {
   const { t } = useLanguage();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['statistics'],
+    queryKey: [QUERY_KEY_STATISTICS],
     queryFn: statisticsApi.getStatistics,
-    refetchInterval: 30000,
+    refetchInterval: STATS_REFETCH_INTERVAL_MS,
   });
 
   if (isLoading) {

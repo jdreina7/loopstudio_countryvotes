@@ -8,6 +8,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import {
+  CACHE_DEFAULT_TTL_MS,
+  THROTTLER_TTL_MS,
+  THROTTLER_LIMIT,
+} from './utils/constants';
 
 @Module({
   imports: [
@@ -19,12 +24,12 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     ),
     CacheModule.register({
       isGlobal: true,
-      ttl: 300000, // 5 minutes cache
+      ttl: CACHE_DEFAULT_TTL_MS, // 5 minutes cache
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 1000, // 1 second
-        limit: 5, // 5 requests per second
+        ttl: THROTTLER_TTL_MS, // 1 second
+        limit: THROTTLER_LIMIT, // 5 requests per second
       },
     ]),
     CountriesModule,

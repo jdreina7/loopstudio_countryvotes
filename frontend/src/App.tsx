@@ -12,6 +12,7 @@ import { VotesBarChart } from './components/VotesBarChart';
 import { RegionPieChart } from './components/RegionPieChart';
 import { Footer } from './components/Footer';
 import { useLanguage } from './contexts/LanguageContext';
+import { MESSAGE_DISPLAY_DURATION_MS } from './utils/constants';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -42,7 +43,7 @@ function App() {
 
     setTimeout(() => {
       setMessageType(null);
-    }, 5000);
+    }, MESSAGE_DISPLAY_DURATION_MS);
   };
 
   const handleVoteError = () => {
@@ -50,7 +51,7 @@ function App() {
 
     setTimeout(() => {
       setMessageType(null);
-    }, 5000);
+    }, MESSAGE_DISPLAY_DURATION_MS);
   };
 
   return (

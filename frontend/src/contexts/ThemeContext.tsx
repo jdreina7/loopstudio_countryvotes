@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { STORAGE_KEY_THEME, DOM_ATTR_THEME } from '../utils/constants';
 
 type Theme = 'light' | 'dark';
 
@@ -12,13 +13,13 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) as Theme;
     return savedTheme || 'light';
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute(DOM_ATTR_THEME, theme);
+    localStorage.setItem(STORAGE_KEY_THEME, theme);
   }, [theme]);
 
   const toggleTheme = () => {

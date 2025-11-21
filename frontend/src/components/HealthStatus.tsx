@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { healthApi } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import {
+  QUERY_KEY_HEALTH,
+  HEALTH_CHECK_REFETCH_MS,
+  HEALTH_CHECK_RETRY_COUNT,
+  HEALTH_STATUS_OK,
+  SERVICE_STATUS_UP,
+} from '../utils/constants';
 import './HealthStatus.css';
 
 interface HealthDetail {
@@ -24,10 +31,10 @@ export const HealthStatus = () => {
   const { t } = useLanguage();
 
   const { data, isLoading, error } = useQuery<HealthResponse>({
-    queryKey: ['health'],
+    queryKey: [QUERY_KEY_HEALTH],
     queryFn: healthApi.getHealth,
-    refetchInterval: 30000, // Refetch every 30 seconds
-    retry: 2,
+    refetchInterval: HEALTH_CHECK_REFETCH_MS,
+    retry: HEALTH_CHECK_RETRY_COUNT,
   });
 
   if (isLoading) {
@@ -51,9 +58,9 @@ export const HealthStatus = () => {
     );
   }
 
-  const dbStatus = data.details?.database?.status || 'down';
-  const apiStatus = data.details?.['rest-countries-api']?.status || 'down';
-  const isHealthy = data.status === 'ok';
+  const dbStatus = data.details?.database?.status || SERVICE_STATUS_UP;
+  const apiStatus = data.details?.['rest-countries-api']?.status || SERVICE_STATUS_UP;
+  const isHealthy = data.status === HEALTH_STATUS_OK;
 
   return (
     <div className={`health-status ${isHealthy ? 'healthy' : 'unhealthy'}`}>
@@ -61,13 +68,13 @@ export const HealthStatus = () => {
       <div className="health-details">
         <span className="health-title">{t.health.systemStatus}</span>
         <div className="health-services">
-          <div className={`service-status ${dbStatus === 'up' ? 'up' : 'down'}`}>
+          <div className={`service-status ${dbStatus === SERVICE_STATUS_UP ? 'up' : 'down'}`}>
             <span className="service-dot"></span>
-            <span>{t.health.database}: {dbStatus === 'up' ? t.health.online : t.health.offline}</span>
+            <span>{t.health.database}: {dbStatus === SERVICE_STATUS_UP ? t.health.online : t.health.offline}</span>
           </div>
-          <div className={`service-status ${apiStatus === 'up' ? 'up' : 'down'}`}>
+          <div className={`service-status ${apiStatus === SERVICE_STATUS_UP ? 'up' : 'down'}`}>
             <span className="service-dot"></span>
-            <span>{t.health.externalApi}: {apiStatus === 'up' ? t.health.online : t.health.offline}</span>
+            <span>{t.health.externalApi}: {apiStatus === SERVICE_STATUS_UP ? t.health.online : t.health.offline}</span>
           </div>
         </div>
       </div>

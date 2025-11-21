@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { translations, type Language, type Translations } from '../i18n/translations';
+import { STORAGE_KEY_LANGUAGE } from '../utils/constants';
 
 interface LanguageContextType {
   language: Language;
@@ -12,12 +13,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>(() => {
-    const savedLanguage = localStorage.getItem('language') as Language;
+    const savedLanguage = localStorage.getItem(STORAGE_KEY_LANGUAGE) as Language;
     return savedLanguage || 'es';
   });
 
   useEffect(() => {
-    localStorage.setItem('language', language);
+    localStorage.setItem(STORAGE_KEY_LANGUAGE, language);
   }, [language]);
 
   const toggleLanguage = () => {

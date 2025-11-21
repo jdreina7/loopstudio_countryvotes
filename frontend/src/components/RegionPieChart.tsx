@@ -7,19 +7,25 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import type { PieLabelRenderProps } from 'recharts';
 import { statisticsApi } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
+import {
+  QUERY_KEY_VOTES_BY_REGION,
+  REGION_CHART_REFETCH_MS,
+  PIE_CHART_HEIGHT,
+  PIE_CHART_OUTER_RADIUS,
+  CHART_COLORS,
+} from '../utils/constants';
 import './VotesBarChart.css';
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export const RegionPieChart = () => {
   const { t } = useLanguage();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['votesByRegion'],
+    queryKey: [QUERY_KEY_VOTES_BY_REGION],
     queryFn: statisticsApi.getVotesByRegion,
-    refetchInterval: 30000,
+    refetchInterval: REGION_CHART_REFETCH_MS,
   });
 
   if (isLoading) {
@@ -43,7 +49,7 @@ export const RegionPieChart = () => {
   return (
     <div className="chart-container">
       <h3 className="chart-title">{t.charts.regionDistribution}</h3>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={PIE_CHART_HEIGHT}>
         <PieChart>
           <Pie
             data={data}
@@ -51,12 +57,17 @@ export const RegionPieChart = () => {
             nameKey="region"
             cx="50%"
             cy="50%"
-            outerRadius={120}
-            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            outerRadius={PIE_CHART_OUTER_RADIUS}
+            label={(props: PieLabelRenderProps) =>
+              `${props.name || ''} ${props.percent ? (props.percent * 100).toFixed(0) : 0}%`
+            }
             labelLine={{ stroke: 'var(--text-secondary)' }}
           >
-            {data.map((_entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            {data.map((_entry: unknown, index: number) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+              />
             ))}
           </Pie>
           <Tooltip

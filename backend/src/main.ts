@@ -4,6 +4,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { VersioningType, Logger } from '@nestjs/common';
 import { MESSAGES } from './common/constants/messages';
+import {
+  API_DEFAULT_VERSION,
+  API_VERSION_PREFIX,
+  SWAGGER_API_VERSION,
+  SWAGGER_DOCS_PATH,
+} from './utils/constants';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -22,8 +28,8 @@ async function bootstrap() {
   // Enable versioning
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: '1',
-    prefix: 'api/v',
+    defaultVersion: API_DEFAULT_VERSION,
+    prefix: API_VERSION_PREFIX,
   });
 
   // Enable CORS
@@ -36,11 +42,11 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('CountryVote API')
     .setDescription('API for voting and ranking favorite countries')
-    .setVersion('1.0')
+    .setVersion(SWAGGER_API_VERSION)
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup(SWAGGER_DOCS_PATH, app, document, {
     swaggerOptions: {
       tagsSorter: 'alpha', // Sort tags alphabetically
       operationsSorter: 'alpha', // Sort operations alphabetically within each tag

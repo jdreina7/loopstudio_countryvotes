@@ -1,4 +1,5 @@
 import { useLanguage } from '../contexts/LanguageContext';
+import { ERROR_COLOR } from '../utils/constants';
 import './ErrorMessage.css';
 
 export const ErrorMessage = () => {
@@ -13,10 +14,10 @@ export const ErrorMessage = () => {
         viewBox="0 0 24 24"
         fill="none"
       >
-        <circle cx="12" cy="12" r="11" stroke="#dc3545" strokeWidth="2" />
+        <circle cx="12" cy="12" r="11" stroke={ERROR_COLOR} strokeWidth="2" />
         <path
           d="M8 8L16 16M16 8L8 16"
-          stroke="#dc3545"
+          stroke={ERROR_COLOR}
           strokeWidth="2"
           strokeLinecap="round"
         />

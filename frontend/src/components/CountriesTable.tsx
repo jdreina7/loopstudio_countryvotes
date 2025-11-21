@@ -3,6 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { votesApi } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import { SearchInput } from './SearchInput';
+import {
+  QUERY_KEY_TOP_COUNTRIES,
+  REFETCH_INTERVAL_MS,
+  TOP_COUNTRIES_PAGE_SIZE,
+  FLAG_IMAGE_WIDTH,
+} from '../utils/constants';
 import './CountriesTable.css';
 
 interface CountriesTableProps {
@@ -14,9 +20,9 @@ export const CountriesTable = ({ refreshTrigger }: CountriesTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: countries = [], isLoading } = useQuery({
-    queryKey: ['topCountries', refreshTrigger],
-    queryFn: () => votesApi.getTopCountries(10),
-    refetchInterval: 30000, // Refetch every 30 seconds
+    queryKey: [QUERY_KEY_TOP_COUNTRIES, refreshTrigger],
+    queryFn: () => votesApi.getTopCountries(TOP_COUNTRIES_PAGE_SIZE),
+    refetchInterval: REFETCH_INTERVAL_MS,
   });
 
   const filteredCountries = useMemo(() => {
@@ -62,7 +68,7 @@ export const CountriesTable = ({ refreshTrigger }: CountriesTableProps) => {
                   filteredCountries.map((country) => (
                     <tr key={country.code}>
                       <td>{country.name}</td>
-                      <td><img src={country.flag} alt={country.officialName} width={30} /></td>
+                      <td><img src={country.flag} alt={country.officialName} width={FLAG_IMAGE_WIDTH} /></td>
                       <td>{country.capital}</td>
                       <td>{country.region}</td>
                       <td>{country.subregion}</td>

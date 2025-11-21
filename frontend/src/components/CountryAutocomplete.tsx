@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { countriesApi } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import type { Country } from '../types';
+import { AUTOCOMPLETE_DEBOUNCE_MS, MIN_AUTOCOMPLETE_LENGTH } from '../utils/constants';
 import './CountryAutocomplete.css';
 
 interface CountryAutocompleteProps {
@@ -37,7 +38,7 @@ export const CountryAutocomplete = ({
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (value.length >= 2) {
+      if (value.length >= MIN_AUTOCOMPLETE_LENGTH) {
         setIsLoading(true);
         try {
           const results = await countriesApi.searchCountries(value);
@@ -54,7 +55,7 @@ export const CountryAutocomplete = ({
       }
     };
 
-    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    const debounceTimer = setTimeout(fetchSuggestions, AUTOCOMPLETE_DEBOUNCE_MS);
     return () => clearTimeout(debounceTimer);
   }, [value]);
 
@@ -92,7 +93,7 @@ export const CountryAutocomplete = ({
           ))}
         </ul>
       )}
-      {showSuggestions && value.length >= 2 && suggestions.length === 0 && !isLoading && (
+      {showSuggestions && value.length >= MIN_AUTOCOMPLETE_LENGTH && suggestions.length === 0 && !isLoading && (
         <ul className="suggestions-list">
           <li className="suggestion-item no-results">{t.autocomplete.noResults}</li>
         </ul>

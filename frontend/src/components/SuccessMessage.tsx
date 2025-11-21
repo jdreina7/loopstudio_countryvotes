@@ -1,4 +1,5 @@
 import { useLanguage } from '../contexts/LanguageContext';
+import { SUCCESS_COLOR } from '../utils/constants';
 import './SuccessMessage.css';
 
 export const SuccessMessage = () => {
@@ -13,10 +14,10 @@ export const SuccessMessage = () => {
         viewBox="0 0 24 24"
         fill="none"
       >
-        <circle cx="12" cy="12" r="11" stroke="#28a745" strokeWidth="2" />
+        <circle cx="12" cy="12" r="11" stroke={SUCCESS_COLOR} strokeWidth="2" />
         <path
           d="M7 12L10 15L17 8"
-          stroke="#28a745"
+          stroke={SUCCESS_COLOR}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
