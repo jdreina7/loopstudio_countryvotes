@@ -25,9 +25,11 @@ const api = axios.create({
 });
 
 export const countriesApi = {
-  searchCountries: async (query: string): Promise<Country[]> => {
+  searchCountries: async (query: string, signal?: AbortSignal): Promise<Country[]> => {
     if (query.length < MIN_SEARCH_QUERY_LENGTH) return [];
-    const response = await api.get(`${COUNTRIES_SEARCH_ENDPOINT}?q=${query}`);
+    const response = await api.get(`${COUNTRIES_SEARCH_ENDPOINT}?q=${query}`, {
+      signal,
+    });
     return response.data.results;
   },
 

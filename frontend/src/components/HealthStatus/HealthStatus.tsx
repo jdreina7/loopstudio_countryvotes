@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { healthApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import { healthApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   QUERY_KEY_HEALTH,
   HEALTH_CHECK_REFETCH_MS,
   HEALTH_CHECK_RETRY_COUNT,
   HEALTH_STATUS_OK,
   SERVICE_STATUS_UP,
-} from '../utils/constants';
+} from '../../utils/constants';
 import './HealthStatus.css';
 
 interface HealthDetail {

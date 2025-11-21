@@ -9,8 +9,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { votesApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import { votesApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   QUERY_KEY_TOP_COUNTRIES_CHART,
   CHART_REFETCH_INTERVAL_MS,
@@ -22,7 +22,7 @@ import {
   BAR_CHART_X_AXIS_HEIGHT,
   BAR_CHART_COLOR,
   BAR_BORDER_RADIUS,
-} from '../utils/constants';
+} from '../../utils/constants';
 import './VotesBarChart.css';
 
 export const VotesBarChart = () => {

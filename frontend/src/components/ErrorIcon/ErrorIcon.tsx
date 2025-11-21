@@ -1,4 +1,4 @@
-import { ERROR_COLOR } from '../utils/constants';
+import { ERROR_COLOR } from '../../utils/constants';
 import './ErrorIcon.css';
 
 interface ErrorIconProps {

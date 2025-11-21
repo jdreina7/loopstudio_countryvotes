@@ -1,12 +1,19 @@
-import { useLanguage } from '../contexts/LanguageContext';
-import { SUCCESS_COLOR } from '../utils/constants';
+import { motion } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { SUCCESS_COLOR } from '../../utils/constants';
 import './SuccessMessage.css';
 
 export const SuccessMessage = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="success-message">
+    <motion.div
+      className="success-message"
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       <svg
         className="success-icon"
         width="24"
@@ -24,6 +31,6 @@ export const SuccessMessage = () => {
         />
       </svg>
       <span>{t.success.message}</span>
-    </div>
+    </motion.div>
   );
 };

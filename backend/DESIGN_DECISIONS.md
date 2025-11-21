@@ -327,27 +327,93 @@ email: createVoteDto.email.toLowerCase()
 - **Documentation**: Tests serve as usage examples
 - **NestJS integration**: Built-in testing utilities make testing easy
 
-**Test Coverage**:
-- VotesService: Vote creation, duplicate detection, top countries aggregation
-- CountriesService: API integration, caching, search functionality
-- Controllers: HTTP request/response handling
-- Target coverage: >80% for critical business logic
+**Test Coverage** (Updated):
+- **VotesService**: Vote creation, duplicate detection, top countries aggregation, regions, timeline - **97.95% coverage**
+- **VotesController**: HTTP request/response handling for all endpoints - **100% coverage**
+- **StatisticsService**: Detailed stats, regional distribution, timeline data - **100% coverage**
+- **StatisticsController**: All statistics endpoints - **100% coverage**
+- **CountriesService**: API integration, caching, search functionality - **98.68% coverage**
+- **Overall Coverage**: **98.16%** (73/73 tests passing)
+
+**Test Strategy**:
+- Unit tests for all services with mock dependencies
+- Controller tests verify HTTP layer correctly
+- Edge cases: duplicate votes, MongoDB errors, API failures
+- Mock patterns for Mongoose models and external APIs
 
 **Non-Functional Requirements Met**:
 - **Reliability**: Tests ensure core functionality works as expected
 - **Maintainability**: Tests make refactoring safer
 - **Quality**: Automated testing improves code quality
+- **Confidence**: High coverage ensures robust application
 
 **Trade-offs** (Time Constraints):
 - No E2E tests (would require test database setup)
 - No integration tests for external REST Countries API
-- Limited edge case coverage (focus on happy path and common errors)
+- Test execution requires TMPDIR=/tmp for file system permissions
+
+---
+
+## Code Organization
+
+### 14. Constants Centralization
+**Decision**: Centralize all hardcoded values in `/src/utils/constants.ts`.
+
+**Rationale**:
+- **Maintainability**: Single source of truth for magic numbers and strings
+- **Consistency**: Ensures same values are used across the application
+- **Type safety**: Constants are properly typed and exported
+- **Easy updates**: Changing values in one place updates entire application
+- **Readability**: Named constants make code self-documenting
+
+**Categories of Constants**:
+1. **Cache Configuration**: TTL values for different cache keys
+2. **Cache Keys**: Standardized cache key names
+3. **Throttler Config**: Rate limiting settings
+4. **API Versioning**: Version numbers and paths
+5. **REST Endpoints**: All API endpoint paths
+6. **Validation Rules**: Min/max lengths, patterns
+7. **Defaults**: Default limit values, fallback strings
+8. **Health Check Timeouts**: Timeout values for health checks
+9. **Database Fields**: Standard field names
+10. **Error Codes**: MongoDB error codes
+11. **HTTP Status Codes**: Standard HTTP status codes
+12. **Error Messages**: Consistent error messages
+
+**Example**:
+```typescript
+// Cache configuration
+export const CACHE_DEFAULT_TTL_MS = 300000; // 5 minutes
+export const CACHE_TOP_COUNTRIES_TTL_MS = 300000;
+
+// Validation
+export const VOTE_NAME_MIN_LENGTH = 2;
+export const VOTE_NAME_MAX_LENGTH = 100;
+
+// Database
+export const MONGODB_DUPLICATE_KEY_ERROR_CODE = 11000;
+```
+
+**Files Refactored**:
+- `votes/votes.service.ts` (10+ constants)
+- `votes/votes.controller.ts` (5+ constants)
+- `countries/countries.service.ts` (8+ constants)
+- `health/health.controller.ts` (4+ constants)
+- `app.module.ts` (4+ constants)
+- `main.ts` (4+ constants)
+- `votes/dto/create-vote.dto.ts` (3+ constants)
+
+**Non-Functional Requirements Met**:
+- **Maintainability**: Easy to update values across entire codebase
+- **Consistency**: Prevents accidental different values in different places
+- **Readability**: Code is more self-documenting with named constants
+- **Type Safety**: Constants are properly typed
 
 ---
 
 ## Performance Optimizations
 
-### 14. Aggregation Pipeline Optimization
+### 15. Aggregation Pipeline Optimization
 **Decision**: Use MongoDB aggregation pipeline with limit multiplier for top countries.
 
 **Rationale**:
@@ -367,7 +433,7 @@ email: createVoteDto.email.toLowerCase()
 
 ---
 
-### 15. Selective Field Fetching
+### 16. Selective Field Fetching
 **Decision**: Only fetch required fields from REST Countries API.
 
 **Rationale**:

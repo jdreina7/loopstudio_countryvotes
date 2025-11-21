@@ -1,14 +1,15 @@
 import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { votesApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
-import { SearchInput } from './SearchInput';
+import { votesApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { SearchInput } from '../SearchInput/SearchInput';
 import {
   QUERY_KEY_TOP_COUNTRIES,
   REFETCH_INTERVAL_MS,
   TOP_COUNTRIES_PAGE_SIZE,
   FLAG_IMAGE_WIDTH,
-} from '../utils/constants';
+} from '../../utils/constants';
 import './CountriesTable.css';
 
 interface CountriesTableProps {
@@ -65,15 +66,24 @@ export const CountriesTable = ({ refreshTrigger }: CountriesTableProps) => {
               </thead>
               <tbody>
                 {filteredCountries.length > 0 ? (
-                  filteredCountries.map((country) => (
-                    <tr key={country.code}>
+                  filteredCountries.map((country, index) => (
+                    <motion.tr
+                      key={country.code}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.05,
+                        ease: 'easeOut',
+                      }}
+                    >
                       <td>{country.name}</td>
                       <td><img src={country.flag} alt={country.officialName} width={FLAG_IMAGE_WIDTH} /></td>
                       <td>{country.capital}</td>
                       <td>{country.region}</td>
                       <td>{country.subregion}</td>
                       <td className="votes-cell">{country.voteCount || 0}</td>
-                    </tr>
+                    </motion.tr>
                   ))
                 ) : (
                   <tr>

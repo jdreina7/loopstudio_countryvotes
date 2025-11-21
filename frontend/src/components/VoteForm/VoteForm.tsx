@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { z } from 'zod';
-import { CountryAutocomplete } from './CountryAutocomplete';
-import { ErrorIcon } from './ErrorIcon';
-import { votesApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
-import { ERROR_DUPLICATE_VOTE_KEY } from '../utils/constants';
+import { CountryAutocomplete } from '../CountryAutocomplete/CountryAutocomplete';
+import { ErrorIcon } from '../ErrorIcon/ErrorIcon';
+import { votesApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { ERROR_DUPLICATE_VOTE_KEY } from '../../utils/constants';
 import './VoteForm.css';
 
 interface VoteFormProps {

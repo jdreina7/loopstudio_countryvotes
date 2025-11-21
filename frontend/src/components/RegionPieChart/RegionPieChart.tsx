@@ -8,16 +8,16 @@ import {
   Legend,
 } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
-import { statisticsApi } from '../services/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import { statisticsApi } from '../../services/api';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   QUERY_KEY_VOTES_BY_REGION,
   REGION_CHART_REFETCH_MS,
   PIE_CHART_HEIGHT,
   PIE_CHART_OUTER_RADIUS,
   CHART_COLORS,
-} from '../utils/constants';
-import './VotesBarChart.css';
+} from '../../utils/constants';
+import '../VotesBarChart/VotesBarChart.css';
 
 export const RegionPieChart = () => {
   const { t } = useLanguage();

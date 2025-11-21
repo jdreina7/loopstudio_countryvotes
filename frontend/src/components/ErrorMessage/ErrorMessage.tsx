@@ -1,12 +1,19 @@
-import { useLanguage } from '../contexts/LanguageContext';
-import { ERROR_COLOR } from '../utils/constants';
+import { motion } from 'framer-motion';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { ERROR_COLOR } from '../../utils/constants';
 import './ErrorMessage.css';
 
 export const ErrorMessage = () => {
   const { t } = useLanguage();
 
   return (
-    <div className="error-message">
+    <motion.div
+      className="error-message"
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
       <svg
         className="error-icon"
         width="24"
@@ -23,6 +30,6 @@ export const ErrorMessage = () => {
         />
       </svg>
       <span>{t.error.message}</span>
-    </div>
+    </motion.div>
   );
 };
